@@ -11,7 +11,16 @@ When traveling in your vehicle most of the time it's too difficult to find a rel
 ## Presentation Link
 https://docs.google.com/presentation/d/1HHXv_cyowag3-46fJaYTYJBLmh_6kZCr3NXGMwqHuUQ/edit?usp=sharing
 
-## ScreenShots
+# ScreenShots
+## Parking Spaces Available
+![image](https://user-images.githubusercontent.com/77025176/200157452-68125b50-ffe3-4493-a194-19121da99069.png)
+
+## Booking Page
+![image](https://user-images.githubusercontent.com/77025176/200157464-c12e502d-70ec-4fce-80e5-4de30480689d.png)
+
+## Confirmation Page
+![image](https://user-images.githubusercontent.com/77025176/200157474-27f332a3-7e3f-49cb-9c69-eb98cb641ef2.png)
+
 
 
  
