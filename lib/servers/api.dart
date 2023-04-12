@@ -5,8 +5,32 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 
 String adminBaseUrl =
-    "https://admin-details-bookmyslot.herokuapp.com/AdminDetails";
-String userBaseUrl = "https://user-booking-api.herokuapp.com/UserBooking";
+    "https://bookingadmin-production.up.railway.app/AdminDetails";
+String userBaseUrl =
+    "https://userbookingapi-production.up.railway.app/UserBooking";
+
+Future<bool> addUserDetails(String userId, String fname, String lname,
+    String vehicleType, String vehicleModel, String vehicleNumber) async {
+  Map data = {
+    "userId": userId,
+    "fname": fname,
+    "lname": lname,
+    "vdetails": {
+      "vehicleType": vehicleType,
+      "vehicleName": vehicleModel,
+      "vehicleNo": vehicleNumber
+    }
+  };
+  print(data);
+  http.Response response = await http.post(Uri.parse('$userBaseUrl/AddData'),
+      body: json.encode(data), headers: {"Content-Type": "application/json"});
+  print(response.body);
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 Future<List> GetParkingLots() async {
   http.Response response =
@@ -18,6 +42,17 @@ Future<List> GetParkingLots() async {
     return [];
   }
 }
+
+// Future<Map<String, dynamic>> fetchTicketData(String userId) {
+//   return http.get(Uri.parse('$userBaseUrl/$userId/ticket')).then((response) {
+//     if (response.statusCode == 200) {
+//       final decoded = json.decode(response.body);
+//       return decoded;
+//     } else {
+//       throw Exception('Failed to load ticket data');
+//     }
+//   });
+// }
 
 Future<Map> ParkingLot(String id) async {
   http.Response response =
@@ -35,16 +70,16 @@ Future<Map> ParkingLot(String id) async {
 //   if (typeVehicle == "car") {
 //     carSpace = carSpace - 1;
 //     Map data = {
-//       "placeId": 1,
+//       "ownerId": 1,
 //       "fnameofowner": "test",
 //       "lnameofowner": "test",
 //       "password": "test",
 //       "email": "test",
 //       "carSpace": carSpace,
-//       "parkingManager": "test",
-//       "parkingPhNo": "test",
-//       "parkingLot": "test",
-//       "address": "test"
+//       "pmanager": "test",
+//       "pphNo": "test",
+//       "plotName": "test",
+//       "paddress": "test"
 //     };
 //     print("-----------------------------------");
 //     print(json.encode(data));
@@ -64,16 +99,16 @@ Future<Map> ParkingLot(String id) async {
 //   } else {
 //     bikeSpace = bikeSpace - 1;
 //     Map data = {
-//       "placeId": 1,
+//       "ownerId": 1,
 //       "fnameofowner": "test",
 //       "lnameofowner": "test",
 //       "password": "test",
 //       "email": "test",
 //       "bikeSpace": bikeSpace,
-//       "parkingManager": "test",
-//       "parkingPhNo": "test",
-//       "parkingLot": "test",
-//       "address": "test",
+//       "pmanager": "test",
+//       "pphNo": "test",
+//       "plotName": "test",
+//       "paddress": "test",
 //     };
 //     print("-----------------------------------");
 //     print(data);
@@ -90,20 +125,10 @@ Future<Map> ParkingLot(String id) async {
 //     }
 //   }
 // }
-Future<int> updateParkingLotCar(int id, int carSpace) async {
- 
+Future<int> updateParkingLotCar(String id, int carSpace) async {
   Map data = {
-      "placeId": 1,
-      "fnameofowner": "test",
-      "lnameofowner": "test",
-      "password": "test",
-      "email": "test",
-      "carSpace": carSpace,
-      "parkingManager": "test",
-      "parkingPhNo": "test",
-      "parkingLot": "test",
-      "address": "test"
-    };
+    "carSpace": carSpace,
+  };
   print("-----------------------------------");
   print(json.encode(data));
   http.Response response =
@@ -120,20 +145,11 @@ Future<int> updateParkingLotCar(int id, int carSpace) async {
     return carSpace;
   }
 }
-Future<int> updateParkingLotBike(int id, int bikeSpace) async {
- 
+
+Future<int> updateParkingLotBike(String id, int bikeSpace) async {
   Map data = {
-      "placeId": 1,
-      "fnameofowner": "test",
-      "lnameofowner": "test",
-      "password": "test",
-      "email": "test",
-      "bikeSpace": bikeSpace,
-      "parkingManager": "test",
-      "parkingPhNo": "test",
-      "parkingLot": "test",
-      "address": "test"
-    };
+    "bikeSpace": bikeSpace,
+  };
   print("-----------------------------------");
   print(json.encode(data));
   http.Response response =
@@ -150,21 +166,22 @@ Future<int> updateParkingLotBike(int id, int bikeSpace) async {
     return bikeSpace;
   }
 }
+
 // Future<Map> updateParkingLotIncrease(
 //     int id, String typeVehicle, int carSpace, int bikeSpace) async {
 //   if (typeVehicle == "car") {
 //     carSpace = carSpace + 1;
 //     Map data = {
-//       "placeId": 1,
+//       "ownerId": 1,
 //       "fnameofowner": "test",
 //       "lnameofowner": "test",
 //       "password": "test",
 //       "email": "test",
 //       "carSpace": carSpace,
-//       "parkingManager": "test",
-//       "parkingPhNo": "test",
-//       "parkingLot": "test",
-//       "address": "test"
+//       "pmanager": "test",
+//       "pphNo": "test",
+//       "plotName": "test",
+//       "paddress": "test"
 //     };
 //     print("-----------------------------------");
 //     print(json.encode(data));
@@ -184,16 +201,16 @@ Future<int> updateParkingLotBike(int id, int bikeSpace) async {
 //   } else {
 //     bikeSpace = bikeSpace + 1;
 //     Map data = {
-//       "placeId": 1,
+//       "ownerId": 1,
 //       "fnameofowner": "test",
 //       "lnameofowner": "test",
 //       "password": "test",
 //       "email": "test",
 //       "bikeSpace": bikeSpace,
-//       "parkingManager": "test",
-//       "parkingPhNo": "test",
-//       "parkingLot": "test",
-//       "address": "test",
+//       "pmanager": "test",
+//       "pphNo": "test",
+//       "plotName": "test",
+//       "paddress": "test",
 //     };
 //     print("-----------------------------------");
 //     print(data);
@@ -210,28 +227,80 @@ Future<int> updateParkingLotBike(int id, int bikeSpace) async {
 //     }
 //   }
 // }
-
-Future<bool> addBooking(
-    int bookingId, String vehicle, int hours, int parkingLotId) async {
-  print("in add booking");
-
+Future<bool> generateTicket(String userId, String ownerId, String bookingTime,
+    int duration, String ticketId, String checkoutId) async {
   Map data = {
-    "bookingID": bookingId,
-    "vehicleType": vehicle,
-    "date": DateTime.now().toString(),
-    "time": hours,
-    "placeId": parkingLotId
+    "tickets": {
+      "ticketId": ticketId,
+      "ticketIdCheckout": checkoutId,
+      "ownerId": ownerId,
+      "bookingtime": bookingTime,
+      "duration": duration,
+      "activeStatus": false,
+    }
   };
-  http.Response response = await http.post(Uri.parse('$userBaseUrl/AddData'),
-      headers: {"content-type": "application/json"},
-      body: json.encode(data));
-print(json.encode(data));
-  print(response.body);
+  print("-----------------------------------");
+  print(json.encode(data));
+  http.Response response =
+      await http.put(Uri.parse('$userBaseUrl/Ticket/$userId'),
+          headers: {
+            "content-type": "application/json",
+          },
+          body: json.encode(data));
   if (response.statusCode == 200) {
-    print("booking added");
+    print("ticket generated");
     return true;
   } else {
-    print("booking not added");
+    print("ticket not generated");
     return false;
   }
 }
+
+Future<Map> getTicket(String userId) async {
+  print(userId);
+  http.Response response =
+      await http.get(Uri.parse('$userBaseUrl/$userId/tickets'));
+  if (response.statusCode == 200) {
+    print("tickets fetched");
+    return json.decode(response.body);
+  } else {
+    print("tickets not fetched");
+    return json.decode(response.body);
+  }
+}
+
+// Future<bool> checkCheckInStatus() async {
+//   http.Response response =
+//       await http.get(Uri.parse('$userBaseUrl/CheckInStatus'));
+//   if (response.statusCode == 200) {
+//     print("status fetched");
+//     return true;
+//   } else {
+//     print("status not fetched");
+//     return false;
+//   }
+// }
+
+// Future<bool> addBooking(
+//     int bookingId, String vehicle, int hours, String parkingLotId) async {
+//   print("in add booking");
+
+//   Map data = {
+//     "bookingID": bookingId,
+//     "vehicleType": vehicle,
+//     "date": DateTime.now().toString(),
+//     "time": hours,
+//     "ownerId": parkingLotId
+//   };
+//   http.Response response = await http.post(Uri.parse('$userBaseUrl/AddData'),
+//       headers: {"content-type": "application/json"}, body: json.encode(data));
+//   print(json.encode(data));
+//   print(response.body);
+//   if (response.statusCode == 200) {
+//     print("booking added");
+//     return true;
+//   } else {
+//     print("booking not added");
+//     return false;
+//   }
+// }

@@ -7,93 +7,144 @@ import 'package:path_provider/path_provider.dart';
 class AuthProvider with ChangeNotifier {
   bool _isLoggedin = false;
   bool _loading = true;
-  // bool _submitted = false;
   String _email = "";
   String _password = "";
-  String _role = "";
-  String _uid = "";
-  // bool get submitted => _submitted;
+  String _userId = "";
+  String _ownerId = "";
   bool get isLoggedin => _isLoggedin;
   String get email => _email;
   String get password => _password;
-  String get role => _role;
-  String get uid => _uid;
+  String get userId => _userId;
   bool get loading => _loading;
+  String get ownerId => _ownerId;
+  set email(String value) {
+    _email = value;
+    notifyListeners();
+  }
+
+  set password(String value) {
+    _password = value;
+    notifyListeners();
+  }
+
+  set userId(String value) {
+    _userId = value;
+    notifyListeners();
+  }
+
+  set ownerId(String value) {
+    _ownerId = value;
+    notifyListeners();
+  }
+
+  Future<void> ValuesAuth(String value) async {
+    ownerId = value;
+    
+  }
 
   Future<void> initAuth() async {
     const storage = FlutterSecureStorage();
     try {
       _email = await storage.read(key: "email") ?? "";
       _password = await storage.read(key: "password") ?? "";
-      _role = await storage.read(key: "role") ?? "";
-      _uid = await storage.read(key: "uid") ?? "";
+      _userId = await storage.read(key: "uid") ?? "";
     } catch (e) {
-      _email = _password = _role = _uid = "";
+      _email = _password = _userId = "";
       print(e);
     }
-    _isLoggedin = _email != "" ? true : false;
+    if (_email != "") {
+      _isLoggedin = true;
+    } else {
+      _isLoggedin = false;
+    }
     _loading = false;
     notifyListeners();
   }
 
-  Future<String> signUp(String email, String password, String rool) async {
-    final auth = FirebaseAuth.instance;
-    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-    const storage = FlutterSecureStorage();
+  Future<String> signUp(String email, String password) async {
     try {
-      final result = await auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      _uid = result.user!.uid;
-      _email = email;
-      _password = password;
-      await firebaseFirestore.collection("users").doc(_uid).set({
-        "email": email,
-        "role": rool,
-        "uid": _uid,
-      });
-      notifyListeners();
-      return "Signed Up";
-    } catch (e) {
-    return "Something went wrong please try again";
-    
-    }
-
-    await storage.write(key: "email", value: email);
-    notifyListeners();
-  }
-
-  Future<String> login(String email, String password) async {
-    try{
       final auth = FirebaseAuth.instance;
-    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-    const storage = FlutterSecureStorage();
-    final result =
-        await auth.signInWithEmailAndPassword(email: email, password: password);
-    _uid = result.user!.uid;
-    await firebaseFirestore.collection("users").doc(_uid).get().then((value) {
-      _role = value.data()!["role"];
-      _uid = value.data()!["uid"];
-    });
-    _isLoggedin = true;
-    storage.write(key: "email", value: email);
-    storage.write(key: "password", value: password);
-    storage.write(key: "role", value: _role);
-    storage.write(key: "uid", value: _uid);
-    print('=====================================');
-    print('auth');
-    print(_role);
-    print(_uid);
-    print(_email);
-    print('=====================================');
-    
-    notifyListeners();
-    return "Login Success";
-    }
-    catch(e){
-      _isLoggedin = false;
-      return "Login Failed";
+      final firestore = FirebaseFirestore.instance;
+      const storage = FlutterSecureStorage();
+
+      // Create user with email and password
+      final result = await auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Save user information to Firestore
+      await firestore.collection("users").doc(result.user!.uid).set({
+        "email": email,
+        "uid": result.user!.uid,
+        "password": password,
+      });
+      final doc =
+          await firestore.collection("users").doc(result.user!.uid).get();
+      _userId = doc.get("uid");
+      userId = _userId;
+      print('----------------------------------');
+      print(result);
+      print('----------------------------------');
+      print(result.user!.uid);
+      print('----------------------------------');
+      print(_userId);
+      print('----------------------------------');
+
+      // Sign in user
+      await auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Store user credentials securely
+      await storage.write(key: "email", value: email);
+      await storage.write(key: "password", value: password);
+      await storage.write(key: "userId", value: _userId);
+      notifyListeners();
+      // Return success message
+      return "Signed up successfully!";
+    } catch (e) {
+      // Return error message
+      return "Failed to sign up. Please try again later.";
     }
   }
+
+  Future<String> login(String eMail, String password) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final firestore = FirebaseFirestore.instance;
+      const storage = FlutterSecureStorage();
+
+      // Sign in user with email and password
+      final result = await auth.signInWithEmailAndPassword(
+        email: eMail,
+        password: password,
+      );
+      print('----------------------------------');
+
+      print(result.user!.uid);
+      // Retrieve user information from Firestore
+      final doc =
+          await firestore.collection("users").doc(result.user!.uid).get();
+      email = doc.get("email");
+      _userId = doc.get("uid");
+      userId = _userId;
+      // Store user information and credentials securely
+      await storage.write(key: "userId", value: _userId);
+      await storage.write(key: "email", value: email);
+      await storage.write(key: "password", value: password);
+
+      // Notify listeners and return success message
+      notifyListeners();
+      return "Login success";
+    } catch (e) {
+      // Notify listeners and return error message
+      notifyListeners();
+      return "Failed to login. Please try again later.";
+    }
+  }
+
 // Future<void> signInWithGoogle(BuildContext context) async {
 //     // User? firebaseUser;
 //     try {
@@ -134,7 +185,7 @@ class AuthProvider with ChangeNotifier {
 
     await _deleteCacheDir();
     await _deleteAppDir();
-    _email = _password = _role = _uid = "";
+    _email = _password = _userId = "";
     _isLoggedin = false;
     notifyListeners();
   }

@@ -1,8 +1,14 @@
 import 'package:bookmyparkinglot/providers/auth.dart';
 import 'package:bookmyparkinglot/providers/login.dart';
 import 'package:bookmyparkinglot/screens/booking.dart';
+import 'package:bookmyparkinglot/screens/confirm.dart';
+import 'package:bookmyparkinglot/screens/showticket.dart';
+import 'package:bookmyparkinglot/screens/tickectsBooked.dart';
+import 'package:bookmyparkinglot/screens/ticketnew.dart';
 import 'package:bookmyparkinglot/servers/api.dart';
+import 'package:bookmyparkinglot/utilities/appBar.dart';
 import 'package:bookmyparkinglot/utilities/constant.dart';
+import 'package:bookmyparkinglot/utilities/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +22,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -24,169 +29,222 @@ class _MyHomePageState extends State<MyHomePage> {
         horizontal: 0, vertical: size.width * mainCdPadVert);
     final BorderRadius brRad = BorderRadius.circular(size.width * cdBorderRad);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
+      appBar: CustomAppBar(
+        actions: <Widget>[
           IconButton(
+            icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
-              logout(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(),
+                ),
+              );
             },
-            icon: const Icon(
-              Icons.logout,
-            ),
           ),
         ],
       ),
-      body: RefreshIndicator(child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: size.width * mainBdPadHoriz,
-          vertical: size.width * mainBdPadVert,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // const TopMenu(),
-            // SizedBox(height: size.width * (32 / idealDevWd)),
-            Text(
-              "Book Parking Lot",
-              style: TextStyle(
-                fontSize: size.width * h1Size,
-                fontWeight: h1Weight,
+      body: RefreshIndicator(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(
+            horizontal: size.width * mainBdPadHoriz,
+            // vertical: size.width * mainBdPadVert,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Book Parking Lot",
+                style: TextStyle(
+                  fontSize: size.width * h1Size,
+                  fontWeight: h1Weight,
+                ),
               ),
-            ),
-            Text(
-              "Choose your Parking Lot",
-              style: TextStyle(
-                fontSize: size.width * bdTx3Size,
-                fontWeight: bdTx1Weight,
+              Text(
+                "Choose your Parking Lot",
+                style: TextStyle(
+                  fontSize: size.width * bdTx3Size,
+                  fontWeight: bdTx1Weight,
+                ),
               ),
-            ),
-            SizedBox(height: size.width * (17 / idealDevWd)),
-            FutureBuilder(
-              // future: courses(),
-              future: GetParkingLots(),
-              builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
-                if (snapshot.hasData) {
-                  return Column(
-                    children: [
-                      ...(snapshot.data)!.map(
-                        (data) => InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BookingPage(
-                                  data['placeId'],
+              SizedBox(height: size.width * (17 / idealDevWd)),
+              FutureBuilder(
+                // future: courses(),
+                future: GetParkingLots(),
+                builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: [
+                        ...(snapshot.data)!.map(
+                          (data) => InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BookingPage(
+                                    data['ownerId'],
+                                  ),
                                 ),
+                              );
+                            },
+                            child: Card(
+                              elevation: 10,
+                              shadowColor: const Color.fromRGBO(6, 7, 87, 0.12),
+                              shape:
+                                  RoundedRectangleBorder(borderRadius: brRad),
+                              margin: cardMargin,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 150,
+                                    width: double.infinity,
+                                    child: Image.asset(
+                                      "assests/images/park.png",
+                                      fit: BoxFit.fitWidth,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(
+                                        size.width * mainCdPadVert),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              data["plotName"] ??
+                                                  'Rahul Parking Wale',
+                                              style: TextStyle(
+                                                fontSize: size.width * h2Size,
+                                                fontWeight: h2Weight,
+                                              ),
+                                            ),
+                                            Icon(
+                                              data['isVerified']
+                                                  ? Icons.star
+                                                  : Icons.close,
+                                              color: data['isVerified']
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              size: 20,
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          "Address: " + data["paddress"],
+                                          style: TextStyle(
+                                            fontSize: size.width * subHdSize,
+                                            fontWeight: bdTx3Weight,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              size.width * (10 / idealDevWd),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Two-Wheeler: ' +
+                                                  data['bikeSpace'].toString(),
+                                              style: TextStyle(
+                                                fontSize:
+                                                    size.width * bdTx3Size,
+                                                fontWeight: h2Weight,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Four-Wheeler: ' +
+                                                  data['carSpace'].toString(),
+                                              style: TextStyle(
+                                                fontSize:
+                                                    size.width * bdTx3Size,
+                                                fontWeight: h2Weight,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
                               ),
-                            );
-                          },
-                          child: Card(
-                            elevation: 10,
-                            shadowColor: const Color.fromRGBO(6, 7, 87, 0.12),
-                            shape: RoundedRectangleBorder(borderRadius: brRad),
-                            margin: cardMargin,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: 150,
-                                  width: double.infinity,
-                                  child: Image.asset(
-                                    "assests/images/park.png",
-                                    fit: BoxFit.fitWidth,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(
-                                      size.width * mainCdPadVert),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        data['parkingLot']??'Rahul Parking Wale',
-                                        style: TextStyle(
-                                          fontSize: size.width * h2Size,
-                                          fontWeight: h2Weight,
-                                        ),
-                                      ),
-                                      Text(
-                                        "Address: " + data['address'],
-                                        style: TextStyle(
-                                          fontSize: size.width * subHdSize,
-                                          fontWeight: bdTx3Weight,
-                                        ),
-                                      ),
-                                      SizedBox(height: size.width * (10 / idealDevWd),),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                        'Two-Wheeler: ' + data['bikeSpace'].toString(),
-                                        
-                                        style: TextStyle(
-                                          fontSize: size.width * bdTx3Size,
-                                          fontWeight: h2Weight,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Four-Wheeler: ' + data['carSpace'].toString(),
-                                        style: TextStyle(
-                                          fontSize: size.width * bdTx3Size,
-                                          fontWeight: h2Weight,
-                                        ),
-                                      ),
-                                        ],
-                                      ),
-                                      
-                                    ],
-                                  ),
-                                )
-                              ],
                             ),
                           ),
                         ),
+                      ],
+                    );
+                  } else {
+                    return Container(
+                      margin:
+                          EdgeInsets.only(top: size.width * (50 / idealDevWd)),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
                       ),
-                    ],
-                  );
-                } else {
-                  return Container(
-                    margin:
-                        EdgeInsets.only(top: size.width * (50 / idealDevWd)),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
-      ), onRefresh: () async {
-       setState(() {
-          GetParkingLots();
-          print("Refreshed");
-        });
-      },),
+        onRefresh: () async {
+          setState(() {
+            GetParkingLots();
+            print("Refreshed");
+          });
+          await Future.delayed(const Duration(seconds: 2));
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.home,
+              color: bluecolor,
+            ),
+            label: 'Home',
+          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.book),
+          //   label: 'Booking',
+          // ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.qr_code,
+              color: bluecolor,
+            ),
+            label: 'Active Tickets',
+          ),
+        ],
+        currentIndex: 0,
+        selectedItemColor: grey,
+        onTap: (int index) {
+          if (index == 1) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ShowTicket()));
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => BookingPage(),
+            //   ),
+            // );
+          }
+          // else if (index == 2) {
+          //   // Navigator.push(
+          //   //   context,
+          //   //   MaterialPageRoute(
+          //   //     builder: (context) => TicketPage(),
+          //   //   ),
+          //   // );
+          // }
+        },
+      ),
     );
-    // body: SingleChildScrollView(
-    //   physics: ScrollPhysics(),
-    //     child: Column(
-    //   children: [
-    //     Text("Parking", style: TextStyle(fontSize: 20, color: Colors.red)),
-    //     ListView.builder(
-    //       physics: NeverScrollableScrollPhysics(),
-    //       shrinkWrap: true,
-    //           scrollDirection: Axis.vertical,
-    //           itemCount: 10,
-    //           itemBuilder: (context, index) {
-    //             return parkingCard();
-    //           }),
-    //   ],
-    // )));
   }
 
   Widget parkingCard() {
@@ -203,6 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
   Future<void> logout(BuildContext context) async {
     const CircularProgressIndicator();
     await context.read<AuthProvider>().logout();
@@ -211,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => LoginPage(),
+        builder: (context) => Login(),
       ),
     );
   }

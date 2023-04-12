@@ -1,3 +1,5 @@
+import 'package:bookmyparkinglot/screens/confirm.dart';
+import 'package:bookmyparkinglot/screens/tickectsBooked.dart';
 import 'package:bookmyparkinglot/utilities/constant.dart';
 import 'package:bookmyparkinglot/providers/auth.dart';
 import 'package:bookmyparkinglot/screens/ticket.dart';
@@ -47,14 +49,14 @@ class _MyAppState extends State<MyApp> {
           primaryColor: Colors.black,
           scaffoldBackgroundColor: Colors.white,
           appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.black,
-            iconTheme: IconThemeData(color: Colors.white)
+           backgroundColor: Colors.white,
           ),),
+          // home: ConfirmationPage()
       home: context.watch<AuthProvider>().loading
           ? const Loading()
           : (context.watch<AuthProvider>().isLoggedin
               ? const MyHomePage()
-              :  const LoginPage()),
+              :  const Login()),
     );
   }
 }
