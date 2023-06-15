@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bookmyparkinglot/servers/api.dart';
 import 'package:bookmyparkinglot/utilities/appBar.dart';
@@ -27,7 +28,8 @@ class _HelpScreenState extends State<HelpScreen> {
     );
 
     if (result != null) {
-      Map data = await getDataofUsers(result);
+      // Map data = await getDataofUsers(result);
+
       setState(() {
         uniqueCode = result;
         print('uniqueCode: $uniqueCode');
@@ -35,10 +37,11 @@ class _HelpScreenState extends State<HelpScreen> {
     }
   }
 
-  void _sendMessage() {
+ Future< void> _sendMessage() async{
     // Implement the logic to send the selected message
     print('uniqueCode: $uniqueCode');
     print('Sending message: $selectedMessage');
+    // await sendMessage(uniqueCode, selectedMessage);
     SnackBar snackBar = const SnackBar(
       content: Text('Message sent successfully!'),
       backgroundColor: Colors.green,
@@ -117,11 +120,11 @@ class _HelpScreenState extends State<HelpScreen> {
   text: uniqueCode.isEmpty
       ? "Scan the QR code"
       : "Send the Message to Owner",
-  onPressed: () {
+  onPressed: () async{
     if (uniqueCode.isEmpty) {
       _scanQRCode();
     } else if (selectedMessage.isNotEmpty) {
-      _sendMessage();
+      await _sendMessage();
     }
   },
 ),

@@ -11,7 +11,7 @@ void callbackDispatcher() {
           FlutterLocalNotificationsPlugin();
       await flutterLocalNotificationsPlugin.initialize(
         const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          android: AndroidInitializationSettings('@mipmap/launcher_icon'),
         ),
       );
 
@@ -22,42 +22,41 @@ void callbackDispatcher() {
         "Your car has been Towed!",
       );
     }
-if (help == 1) {
+    if (help == 1) {
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
           FlutterLocalNotificationsPlugin();
       await flutterLocalNotificationsPlugin.initialize(
         const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          android: AndroidInitializationSettings('@mipmap/launcher_icon'),
         ),
       );
 
       await showNotification(
-          FlutterLocalNotificationsPlugin(),
-          "Help!!!!",
-          "Please remove your vehicle, Mine is stuck!",
-          "Please remove your vehicle, Mine is stuck!",
-        );
-    }if (help == 2) {
+        FlutterLocalNotificationsPlugin(),
+        "Help!!!!",
+        "Please remove your vehicle, Mine is stuck!",
+        "Please remove your vehicle, Mine is stuck!",
+      );
+    }
+    if (help == 2) {
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
           FlutterLocalNotificationsPlugin();
       await flutterLocalNotificationsPlugin.initialize(
         const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          android: AndroidInitializationSettings('@mipmap/launcher_icon'),
         ),
       );
 
       await showNotification(
-          FlutterLocalNotificationsPlugin(),
-          "Help!!!!",
-          "Please remove your vehicle, I need to go urgently!",
-          "Please remove your vehicle, I need to go urgently!",
-        );
+        FlutterLocalNotificationsPlugin(),
+        "Help!!!!",
+        "Please remove your vehicle, I need to go urgently!",
+        "Please remove your vehicle, I need to go urgently!",
+      );
     }
     return Future.value(true);
   });
 }
-
-
 
 Future<void> showNotification(
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,

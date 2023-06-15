@@ -427,6 +427,7 @@ class _BookingPageState extends State<BookingPage> {
   double price = 0;
   String ticketid = "";
   String checkInid = "";
+  bool isLoading = false;
   // var vehicleList = {
   //   "vehicles": [
   //     {"vehicleNumber": "DLQWW12345", "vehicleType": "car"},
@@ -494,235 +495,238 @@ class _BookingPageState extends State<BookingPage> {
                   if (snapshot.hasData) {
                     var parkingData = snapshot.data![0];
                     var vehicleData = snapshot.data![1];
-                    return Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            "assests/images/park.png",
-                            fit: BoxFit.fitWidth,
-                          ),
-                        ),
-                        SizedBox(height: size.width * (17 / idealDevWd)),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    return isLoading
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Please wait while the ticket is generated...',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
                             children: [
-                              Text(
-                                parkingData["plotName"] ?? 'Rahul Parking Wale',
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: h1Weight,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.asset(
+                                  "assests/images/park.png",
+                                  fit: BoxFit.fitWidth,
                                 ),
                               ),
-                              Text(
-                                parkingData["paddress"],
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: h2Weight,
-                                  color: grey,
+                              SizedBox(height: size.width * (17 / idealDevWd)),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      parkingData["plotName"] ??
+                                          'Rahul Parking Wale',
+                                      style: TextStyle(
+                                        fontSize: 26,
+                                        fontWeight: h1Weight,
+                                      ),
+                                    ),
+                                    Text(
+                                      parkingData["paddress"],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: h2Weight,
+                                        color: grey,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              ),
+                              SizedBox(height: size.width * (17 / idealDevWd)),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    parkingData['pmanager'],
+                                    style: TextStyle(
+                                      fontSize: size.width * subHdSize,
+                                      fontWeight: bdTx2Weight,
+                                    ),
+                                  ),
+                                  Text(
+                                    parkingData['pphNo'],
+                                    style: TextStyle(
+                                      fontSize: size.width * subHdSize,
+                                      fontWeight: bdTx2Weight,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              const Divider(),
+                              SizedBox(height: size.width * (17 / idealDevWd)),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  buildAvailabilityContainer(
+                                    Icons.directions_car,
+                                    "Availability: ${parkingData['carSpace']}",
+                                  ),
+                                  buildAvailabilityContainer(
+                                    Icons.two_wheeler,
+                                    "Availability: ${parkingData['bikeSpace']}",
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: size.width * (20 / idealDevWd)),
+                              Text(
+                                "Select Your Vehicle :",
+                                style: TextStyle(
+                                  fontSize: size.width * h3Size,
+                                  fontWeight: bdTx1Weight,
+                                ),
+                              ),
+                              SizedBox(width: size.width * (10 / idealDevWd)),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: vehicleData.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Column(
+                                    children: [
+                                      buildVehicleListTile(
+                                        vehicleData[index]["vehicleType"] ==
+                                                'car'
+                                            ? Icons.directions_car
+                                            : Icons.two_wheeler,
+                                        vehicleData[index]["vehicleNo"],
+                                        vehicleData[index]["vehicleType"],
+                                      ),
+                                      const Divider(),
+                                    ],
+                                  );
+                                },
+                              ),
+                              SizedBox(height: size.width * (20 / idealDevWd)),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    "No. of Hours:",
+                                    style: TextStyle(
+                                      fontSize: size.width * h3Size,
+                                      fontWeight: bdTx1Weight,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      width: size.width * (10 / idealDevWd)),
+                                  NumberPicker(
+                                    value: _currentIntValue,
+                                    minValue: 1,
+                                    maxValue: 24,
+                                    step: 1,
+                                    itemHeight: 50,
+                                    itemWidth: 75,
+                                    axis: Axis.horizontal,
+                                    textStyle: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: bdTx1Weight,
+                                    ),
+                                    selectedTextStyle: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: size.width * h3Size,
+                                      fontWeight: bdTx1Weight,
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _currentIntValue = value;
+
+                                        calculatePrice();
+                                      });
+                                    },
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: Colors.black26),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: size.width * (20 / idealDevWd)),
+                              Text(
+                                "Total Amount : Rs. $price",
+                                style: TextStyle(
+                                  fontSize: size.width * h3Size,
+                                  fontWeight: bdTx1Weight,
+                                ),
+                              ),
+                              CustomButton(
+                                text: 'Continue',
+                                onPressed: () async {
+                                  if (price == 0) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please select a vehicle type'),
+                                      ),
+                                    );
+                                  } else {
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+                                    await generateIds();
+                                    bool result1 = await bookTicket(
+                                        authProvider.userId,
+                                        ticketid,
+                                        checkInid,
+                                        widget.id,
+                                        _currentIntValue);
+                                    if (_value == 'car') {
+                                      await updateParkingLotCar(widget.id,
+                                          parkingData['carSpace'] - 1);
+                                    } else {
+                                      await updateParkingLotBike(widget.id,
+                                          parkingData['bikeSpace'] - 1);
+                                    }
+
+                                    bool result2 = await addTicketToOwner(
+                                        checkInid,
+                                        ticketid,
+                                        widget.id,
+                                        authProvider.userId,
+                                        vehicleNumberSub);
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                    if (result1 && result2) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Ticket Booked Successfully'),
+                                        ),
+                                      );
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const ShowTicket(),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Ticket Booking Failed'),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
                               ),
                             ],
-                          ),
-                        ),
-                        SizedBox(height: size.width * (17 / idealDevWd)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              parkingData['pmanager'],
-                              style: TextStyle(
-                                fontSize: size.width * subHdSize,
-                                fontWeight: bdTx2Weight,
-                              ),
-                            ),
-                            Text(
-                              parkingData['pphNo'],
-                              style: TextStyle(
-                                fontSize: size.width * subHdSize,
-                                fontWeight: bdTx2Weight,
-                              ),
-                            )
-                          ],
-                        ),
-                        Divider(),
-                        SizedBox(height: size.width * (17 / idealDevWd)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            buildAvailabilityContainer(
-                              Icons.directions_car,
-                              "Availability: ${parkingData['carSpace']}",
-                            ),
-                            buildAvailabilityContainer(
-                              Icons.two_wheeler,
-                              "Availability: ${parkingData['bikeSpace']}",
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: size.width * (20 / idealDevWd)),
-                        Text(
-                          "Select Your Vehicle :",
-                          style: TextStyle(
-                            fontSize: size.width * h3Size,
-                            fontWeight: bdTx1Weight,
-                          ),
-                        ),
-                        SizedBox(width: size.width * (10 / idealDevWd)),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: vehicleData.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Column(
-                              children: [
-                                buildVehicleListTile(
-                                  vehicleData[index]["vehicleType"] == 'car'
-                                      ? Icons.directions_car
-                                      : Icons.two_wheeler,
-                                  vehicleData[index]["vehicleNo"],
-                                  vehicleData[index]["vehicleType"],
-                                ),
-                                const Divider(),
-                              ],
-                            );
-                          },
-                        ),
-                        SizedBox(height: size.width * (20 / idealDevWd)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                              "No. of Hours:",
-                              style: TextStyle(
-                                fontSize: size.width * h3Size,
-                                fontWeight: bdTx1Weight,
-                              ),
-                            ),
-                            SizedBox(width: size.width * (10 / idealDevWd)),
-                            NumberPicker(
-                              value: _currentIntValue,
-                              minValue: 1,
-                              maxValue: 24,
-                              step: 1,
-                              itemHeight: 50,
-                              itemWidth: 75,
-                              axis: Axis.horizontal,
-                              textStyle: TextStyle(
-                                color: Colors.black,
-                                fontWeight: bdTx1Weight,
-                              ),
-                              selectedTextStyle: TextStyle(
-                                color: Colors.black,
-                                fontSize: size.width * h3Size,
-                                fontWeight: bdTx1Weight,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _currentIntValue = value;
-
-                                  calculatePrice();
-                                });
-                              },
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.black26),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: size.width * (20 / idealDevWd)),
-                        Text(
-                          "Total Amount : Rs. $price",
-                          style: TextStyle(
-                            fontSize: size.width * h3Size,
-                            fontWeight: bdTx1Weight,
-                          ),
-                        ),
-                        CustomButton(
-                          text: 'Continue',
-                          onPressed: () async {
-                            if (price == 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please select a vehicle type'),
-                                ),
-                              );
-                            } else {
-                              await generateIds();
-                              bool result1 = await bookTicket(
-                                  authProvider.userId,
-                                  ticketid,
-                                  checkInid,
-                                  widget.id,
-                                  _currentIntValue);
-                              if (_value == 'car') {
-                                await updateParkingLotCar(
-                                    widget.id, parkingData['carSpace'] - 1);
-                              } else {
-                                await updateParkingLotBike(
-                                    widget.id, parkingData['bikeSpace'] - 1);
-                              }
-
-                              bool result2 = await addTicketToOwner(
-                                  checkInid,
-                                  ticketid,
-                                  widget.id,
-                                  authProvider.userId,
-                                  vehicleNumberSub);
-                              if (result1 && result2) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Ticket Booked Successfully'),
-                                  ),
-                                );
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ShowTicket(),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Ticket Booking Failed'),
-                                  ),
-                                );
-                              }
-                            }
-                            //   else {
-                            //     await authProvider.ValuesAuth(
-                            //         parkingData ['ownerId']);
-                            //     if (_value == "car") {
-                            //       await updateParkingLotCar(
-                            //           widget.id,
-                            //           parkingData ['carSpace'] - 1);
-                            //     } else {
-                            //       await updateParkingLotBike(
-                            //           widget.id,
-                            //           parkingData ['bikeSpace'] - 1);
-                            //     }
-                            //     await generateIds(authProvider.userId);
-                            //     await generateTicket(
-                            //       authProvider.userId,
-                            //       parkingData ['ownerId'],
-                            //       DateTime.now().toString(),
-                            //       _currentIntValue,
-                            //       ticketid,
-                            //       checkoutid,
-                            //     );
-                            //     Navigator.pushReplacement(
-                            //       context,
-                            //       MaterialPageRoute(
-                            //         builder: (context) => ShowTicket(),
-                            //       ),
-                            //     );
-                            //   }
-                          },
-                        ),
-                      ],
-                    );
+                          );
                   } else if (snapshot.hasError) {
                     print(snapshot.error);
                     return Text('Error: ${snapshot.error}');
@@ -748,7 +752,7 @@ class _BookingPageState extends State<BookingPage> {
   Container buildAvailabilityContainer(IconData icon, String text) {
     final size = MediaQuery.of(context).size; // Retrieve the screen size
     return Container(
-      padding: EdgeInsets.all(15),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(50),
         border: Border.all(color: bluecolor),
@@ -761,7 +765,7 @@ class _BookingPageState extends State<BookingPage> {
             color: bluecolor,
             size: 20,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             text,
             style: TextStyle(

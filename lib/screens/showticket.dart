@@ -47,7 +47,7 @@ class _ShowTicketState extends State<ShowTicket> {
                 } else if (snapshot.hasData) {
                   final ticketDetails = snapshot.data!;
                   final activeStatus = snapshot.data!['activeStatus'];
-print(ticketDetails);
+                  print(ticketDetails);
                   return Column(
                     children: [
                       Text(
@@ -67,7 +67,7 @@ print(ticketDetails);
                           fontWeight: bdTx1Weight,
                         ),
                       ),
-                      QrImage(
+                      QrImageView(
                         data: ticketDetails['ticketIdCheckout'] ??
                             ticketDetails['ticketIdCheckin'],
                         version: QrVersions.auto,

@@ -27,7 +27,7 @@ Future<void> main() async {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+      AndroidInitializationSettings('@mipmap/launcher_icon');
   const InitializationSettings initializationSettings =
       InitializationSettings(android: initializationSettingsAndroid);
   flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void startTimer() {
-    Timer.periodic(const Duration(seconds: 300), (timer) async {
+    Timer.periodic(const Duration(seconds: 30), (timer) async {
       bool result = await checkTowed();
       int help = await checkHelp();
       if (help == 1) {
