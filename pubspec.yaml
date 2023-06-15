@@ -49,6 +49,12 @@ dependencies:
   numberpicker: ^2.1.1
   qr_flutter: ^4.0.0
   slide_countdown: ^0.3.4
+  flutter_local_notifications: ^14.1.1
+  flutter_timezone: ^1.0.6
+  device_info_plus: ^9.0.2
+  image: ^4.0.17
+  workmanager: ^0.5.1
+  qr_code_scanner: ^1.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

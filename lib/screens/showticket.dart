@@ -9,101 +9,107 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ShowTicket extends StatefulWidget {
-  const ShowTicket({super.key});
+  const ShowTicket({Key? key}) : super(key: key);
 
   @override
   State<ShowTicket> createState() => _ShowTicketState();
 }
 
 class _ShowTicketState extends State<ShowTicket> {
+  Future<Map>? _getTicket;
+
+  @override
+  void initState() {
+    super.initState();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _getTicket = getTicket(authProvider.userId);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     final Size size = MediaQuery.of(context).size;
-    const defaultPadding = EdgeInsets.symmetric(horizontal: 10, vertical: 5);
-    bool activeTicket = false;
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: SingleChildScrollView(
         child: Column(
           children: [
             FutureBuilder(
-              future: getTicket(authProvider.userId),
+              future: _getTicket,
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (snapshot.hasData) {
+                  final ticketDetails = snapshot.data!;
+                  final activeStatus = snapshot.data!['activeStatus'];
+print(ticketDetails);
                   return Column(
                     children: [
                       Text(
                         "Booking Confirmed",
                         style: TextStyle(
-                            fontSize: size.width * h1Size,
-                            fontWeight: h1Weight,
-                            color: bluecolor),
+                          fontSize: size.width * h1Size,
+                          fontWeight: h1Weight,
+                          color: bluecolor,
+                        ),
                       ),
                       SizedBox(height: size.width * (40 / idealDevWd)),
                       SizedBox(height: size.width * (35 / idealDevWd)),
                       Text(
-                        "Booking ID: " + snapshot.data!['ticketId'].toString(),
-                        // "Booking ID: $bookingId",
+                        "Booking ID: ${ticketDetails['ticketIdCheckout'] ?? ticketDetails['ticketIdCheckin']}",
                         style: TextStyle(
                           fontSize: size.width * bdTx3Size,
                           fontWeight: bdTx1Weight,
                         ),
                       ),
                       QrImage(
-                        // data: encoded,
-                        data: snapshot.data!['ticketId'].toString(),
+                        data: ticketDetails['ticketIdCheckout'] ??
+                            ticketDetails['ticketIdCheckin'],
                         version: QrVersions.auto,
-                        size: 200,
+                        size: 250,
                         gapless: false,
                       ),
                       SizedBox(height: size.width * (17 / idealDevWd)),
                       SizedBox(height: size.width * (30 / idealDevWd)),
-                      Text('Scan the QR code to enter the parking lot',
-                          style: TextStyle(
-                            fontSize: size.width * bdTx1Size,
-                            fontWeight: bdTx1Weight,
-                          )),
+                      Text(
+                        'Scan the QR code to the parking lot',
+                        style: TextStyle(
+                          fontSize: size.width * bdTx1Size,
+                          fontWeight: bdTx1Weight,
+                        ),
+                      ),
                       SizedBox(height: size.width * (30 / idealDevWd)),
-                      // Text(
-                      //     'Starting Time: ${DateTime.parse(snapshot.data!["bookingtime"]).day}/${DateTime.parse(snapshot.data!["bookingtime"]).month}/${DateTime.parse(snapshot.data!["bookingtime"]).year} ${DateTime.parse(snapshot.data!["bookingtime"]).hour}:${DateTime.parse(snapshot.data!["bookingtime"]).minute}',
-                      //     style: TextStyle(
-                      //       fontSize: size.width * bdTx1Size,
-                      //       fontWeight: bdTx1Weight,
-                      //     )),
-                      // SizedBox(height: size.width * (30 / idealDevWd)),
-                      // Visibility(
-                      //   visible: snapshot.data!['checkinTime'] != null,
-                      //   child: Text(
-                      //       'Check In Time: ${DateTime.parse(snapshot.data!["checkinTime"]).day}/${DateTime.parse(snapshot.data!["checkinTime"]).month}/${DateTime.parse(snapshot.data!["checkinTime"]).year} ${DateTime.parse(snapshot.data!["bookingtime"]).hour}:${DateTime.parse(snapshot.data!["checkinTime"]).minute}',
-                      //       style: TextStyle(
-                      //         fontSize: size.width * bdTx1Size,
-                      //         fontWeight: bdTx1Weight,
-                      //       )),
-                      // ),
                       SizedBox(height: size.width * (30 / idealDevWd)),
                       CustomButton(
                         text: 'Cancel Booking',
                         onPressed: () async {
-                          // await updateParkingLot();
-
-                          if (snapshot.data!['activeStatus']) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text('You have an active ticket')));
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const MyHomePage()));
+                          if (activeStatus) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'You have an Active Ticket and cannot Cancel Booking',
+                                ),
+                              ),
+                            );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Booking Cancelled')));
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const MyHomePage()));
+                              const SnackBar(
+                                  content: Text('Booking Cancelled')),
+                            );
                           }
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MyHomePage(),
+                            ),
+                          );
                         },
-                      )
+                      ),
                     ],
                   );
                 } else {
@@ -115,7 +121,7 @@ class _ShowTicketState extends State<ShowTicket> {
                   );
                 }
               },
-            )
+            ),
           ],
         ),
       ),

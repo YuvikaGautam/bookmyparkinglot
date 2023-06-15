@@ -15,13 +15,21 @@ import 'package:provider/provider.dart';
 import 'ticket.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  Future<List<dynamic>>? _getParkingLots;
+
+  @override
+  void initState() {
+    super.initState();
+    _getParkingLots = GetParkingLots();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -69,14 +77,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               SizedBox(height: size.width * (17 / idealDevWd)),
-              FutureBuilder(
-                // future: courses(),
-                future: GetParkingLots(),
-                builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+              FutureBuilder<List<dynamic>>(
+                future: _getParkingLots,
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<dynamic>> snapshot) {
                   if (snapshot.hasData) {
                     return Column(
                       children: [
-                        ...(snapshot.data)!.map(
+                        ...snapshot.data!.map(
                           (data) => InkWell(
                             onTap: () {
                               Navigator.push(
@@ -91,8 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Card(
                               elevation: 10,
                               shadowColor: const Color.fromRGBO(6, 7, 87, 0.12),
-                              shape:
-                                  RoundedRectangleBorder(borderRadius: brRad),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: brRad,
+                              ),
                               margin: cardMargin,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +124,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                         Row(
                                           children: [
                                             Text(
-                                              data["plotName"] ??
+                                              data["detailsofowner"]
+                                                      ["plotName"] ??
                                                   'Rahul Parking Wale',
                                               style: TextStyle(
                                                 fontSize: size.width * h2Size,
@@ -123,10 +133,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                               ),
                                             ),
                                             Icon(
-                                              data['isVerified']
+                                              data["detailsofowner"]['verified']
                                                   ? Icons.star
                                                   : Icons.close,
-                                              color: data['isVerified']
+                                              color: data["detailsofowner"]
+                                                      ['verified']
                                                   ? Colors.green
                                                   : Colors.red,
                                               size: 20,
@@ -134,7 +145,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                           ],
                                         ),
                                         Text(
-                                          "Address: " + data["paddress"],
+                                          "Address: " +
+                                              data["detailsofowner"]
+                                                  ["paddress"],
                                           style: TextStyle(
                                             fontSize: size.width * subHdSize,
                                             fontWeight: bdTx3Weight,
@@ -150,7 +163,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                           children: [
                                             Text(
                                               'Two-Wheeler: ' +
-                                                  data['bikeSpace'].toString(),
+                                                  data["detailsofowner"]
+                                                          ['bikeSpace']
+                                                      .toString(),
                                               style: TextStyle(
                                                 fontSize:
                                                     size.width * bdTx3Size,
@@ -159,7 +174,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                             ),
                                             Text(
                                               'Four-Wheeler: ' +
-                                                  data['carSpace'].toString(),
+                                                  data["detailsofowner"]
+                                                          ['carSpace']
+                                                      .toString(),
                                               style: TextStyle(
                                                 fontSize:
                                                     size.width * bdTx3Size,
@@ -178,6 +195,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ],
                     );
+                  } else if (snapshot.hasError) {
+                    return Container(
+                      margin:
+                          EdgeInsets.only(top: size.width * (50 / idealDevWd)),
+                      child: const Center(
+                        child: Text("Something went wrong!"),
+                      ),
+                    );
                   } else {
                     return Container(
                       margin:
@@ -193,11 +218,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         onRefresh: () async {
+          _getParkingLots = GetParkingLots();
           setState(() {
-            GetParkingLots();
+            
             print("Refreshed");
           });
-          await Future.delayed(const Duration(seconds: 2));
+          await Future.delayed(const Duration(seconds: 1));
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -225,8 +251,12 @@ class _MyHomePageState extends State<MyHomePage> {
         selectedItemColor: grey,
         onTap: (int index) {
           if (index == 1) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ShowTicket()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ShowTicket(),
+              ),
+            );
             // Navigator.push(
             //   context,
             //   MaterialPageRoute(
@@ -256,14 +286,13 @@ class _MyHomePageState extends State<MyHomePage> {
             "assests/images/park.png",
             height: 200,
           ),
-          Text("Parking")
+          Text("Parking"),
         ],
       ),
     );
   }
 
   Future<void> logout(BuildContext context) async {
-    const CircularProgressIndicator();
     await context.read<AuthProvider>().logout();
     SnackBar snackBar = const SnackBar(
       content: Text("Logged out successfully"),
